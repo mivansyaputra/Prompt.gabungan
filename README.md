@@ -5,7 +5,8 @@ Aplikasi web satu halaman untuk **kas logistik** dan **seragam** madrasah: penca
 ## Fitur
 - Catat kas masuk dan keluar, riwayat, dan pengingat (nota, cadangan, LPJ)
 - LPJ triwulan dan tahun Hijriyah, dengan arsip, grafik tren bulanan, dan ekspor Excel
-- Data seragam: siswa (impor CSV atau tempel), stok per ukuran, harga, penjualan, indent
+- Data seragam: siswa (impor CSV atau tempel), jenis dan ukuran yang bisa ditambah atau dihapus sendiri, stok per ukuran, harga, penjualan, indent
+- Impor kas dari Excel (.xlsx atau .csv), lengkap dengan template
 - Cadangan dan pemulihan `.json` (kas, seragam, atau gabungan), plus **Gabungkan** cadangan dari beberapa perangkat tanpa menimpa
 - PIN pengunci tampilan, tema gelap dan terang, intro bersuara
 - PWA: dapat dipasang dan jalan offline
