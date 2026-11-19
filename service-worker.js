@@ -1,5 +1,5 @@
 // Naikkan angka VERSI setiap kali index.html diperbarui agar cache lama diganti.
-const VERSI = 'logistik-genz-v3';
+const VERSI = 'logistik-genz-v4';
 const FILE = ['./', 'index.html', 'manifest.json', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png'];
 
 self.addEventListener('install', e => {
