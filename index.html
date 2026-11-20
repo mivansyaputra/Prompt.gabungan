@@ -419,50 +419,86 @@ return{name:'REKAP LPJ',rows:b.rows(),mg:b.mg,rh:{1:21,[sr+1]:50},cols:[30,20,20
 const fd2=d=>d.split('-').reverse().join('/');
 function dashX(y){
 const H='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',RN='http://schemas.openxmlformats.org/officeDocument/2006/relationships',PK='http://schemas.openxmlformats.org/package/2006/relationships',SM='http://schemas.openxmlformats.org/spreadsheetml/2006/main',CN='http://schemas.openxmlformats.org/drawingml/2006/chart',AN='http://schemas.openxmlformats.org/drawingml/2006/main',
-cl=i=>i<26?String.fromCharCode(65+i):'A'+String.fromCharCode(39+i),
+cl=i=>{let s='';for(i++;i>0;i=Math.floor((i-1)/26))s=String.fromCharCode(65+(i-1)%26)+s;return s},
 Fo=[],Fi=[],Bo=[],X=[],
 ix=(a,v)=>{const k=JSON.stringify(v);let i=a.findIndex(z=>z.k==k);if(i<0){a.push({k,v});i=a.length-1}return i},
-st=o=>{const f=ix(Fo,[o.b?1:0,o.sz||11,o.c||'FF000000']),l=o.f?2+ix(Fi,o.f):0,b=ix(Bo,o.bd||''),z=[f,l,b,o.n||0,o.h||'',o.w?1:0],k=JSON.stringify(z);let i=X.findIndex(a=>a.k==k);if(i<0){X.push({k,z});i=X.length-1}return i};
-ix(Fo,[0,11,'FF000000']);ix(Bo,'');st({});
+st=o=>{const f=ix(Fo,[o.b?1:0,o.sz||11,o.c||'FF000000',o.i?1:0]),l=o.f?2+ix(Fi,o.f):0,b=ix(Bo,o.bd||''),z=[f,l,b,o.n||0,o.h||'',o.w?1:0],k=JSON.stringify(z);let i=X.findIndex(a=>a.k==k);if(i<0){X.push({k,z});i=X.length-1}return i};
+ix(Fo,[0,11,'FF000000',0]);ix(Bo,'');st({});
 const mk=cols=>({cols,c:[],mg:[],rh:{}}),put=(s,r,c,v,z,f)=>s.c.push({r,c,v,z,f}),
 box=(s,r1,c1,r2,c2,v,z,f)=>{put(s,r1,c1,v,z,f);for(let r=r1;r<=r2;r++)for(let c=c1;c<=c2;c++)if(r!=r1||c!=c1)put(s,r,c,null,z);if(r2>r1||c2>c1)s.mg.push(cl(c1)+r1+':'+cl(c2)+r2)},
 sd=d=>{const[a,b,c]=String(d).slice(0,10).split('-').map(Number);return Date.UTC(a,b-1,c)/864e5+25569};
 const T=db.tx.filter(t=>hp(t).year==y).sort(cmpD),ST=SG.trx.slice().sort((a,b)=>String(a.t).localeCompare(String(b.t))),
 sA=sal0+sum(db.tx.filter(t=>t.y=='in'&&hk(t)<y*12))-sum(db.tx.filter(t=>t.y=='out'&&hk(t)<y*12)),
 CATX={Rampatan:'Rampatan (suguhan)',Perlengkapan:'Perlengkapan / kebersihan',Konsumsi:'Konsumsi kegiatan',Transportasi:'Transportasi'},cat=t=>CATX[CAT[t.c]]||'Lainnya',tIn=T.filter(t=>t.y=='in'),tOut=T.filter(t=>t.y=='out');
-const bl={b:1,c:'FFFFFFFF',f:'FF0B4F7C',bd:'thin',h:'center',w:1},
-sHd=st(bl),sD=st({bd:'thin',n:166,h:'center'}),sC=st({bd:'thin',h:'center'}),sTx=st({bd:'thin'}),sRp=st({bd:'thin',n:164}),sNo=st({bd:'thin',n:3,h:'center'});
-// ===== sheet KAS & SERAGAM (data sumber rumus) =====
-const K=mk([13,14,10,10,26,40,16]);
-['Tanggal','Bulan H','Tahun H','Jenis','Kategori','Keterangan','Jumlah'].forEach((h,i)=>put(K,1,i,h,sHd));
-T.forEach((t,i)=>{const r=i+2,h=hp(t);put(K,r,0,sd(t.d),sD);put(K,r,1,HN[h.month-1],sC);put(K,r,2,h.year,st({bd:'thin',n:1,h:'center'}));put(K,r,3,t.y=='in'?'Masuk':'Keluar',sC);put(K,r,4,cat(t),sTx);put(K,r,5,String(t.n||t.t||''),sTx);put(K,r,6,+t.a||0,sRp)});
+const GR=CK.map(k=>[CATX[CAT[k]],CAT[k].toUpperCase()]);if(tOut.some(t=>cat(t)=='Lainnya'))GR.push(['Lainnya','LAINNYA']);
+const NG=GR.length,BW=2+3*NG,SS=BW+1,hasL=NG>CK.length;
+// ===== sheet KAS: susunan LPJ triwulan (3 bulan berdampingan), rumus hidup =====
+const NFK='_-[$Rp-421]* #,##0_-;\\-[$Rp-421]* #,##0_-;_-[$Rp-421]* "-"_-;_-@_-',
+kb={bd:'blk',h:'center'},sKH=st({...kb,sz:12,f:'FFB4C6E7'}),sKN=st({...kb}),sKL=st({bd:'blk'}),sKR=st({...kb,n:167}),sKT=st({...kb,b:1,f:'FFFFFF00'}),sKTR=st({...kb,b:1,f:'FFFFFF00',n:167}),
+sKMt=st({b:1,sz:16}),sKQ=st({b:1,sz:22,f:'FF8FAADC',bd:'blk',h:'center'}),sKA=st({...kb,b:1,f:'FFD9D9D9'}),sKAR=st({...kb,b:1,f:'FFD9D9D9',n:167}),
+sKG=st({...kb,b:1,sz:12,f:'FFA9D08E'}),sKGR=st({...kb,b:1,sz:12,f:'FFA9D08E',n:167}),sKO=st({...kb,b:1,sz:12,f:'FFF4B084'}),sKOR=st({...kb,b:1,sz:12,f:'FFF4B084',n:167}),sKB=st({...kb,b:1,sz:12,f:'FFB4C6E7'}),sKBR=st({...kb,b:1,sz:12,f:'FFB4C6E7',n:167});
+const bw=[5,6];GR.forEach(()=>bw.push(20,6,16));const K=mk([]);for(let p=0;p<3;p++){K.cols.push(...bw);if(p<2)K.cols.push(4)}
+const MI=[...Array(12)].map((_,m)=>tIn.filter(t=>hp(t).month==m+1)),MO=[...Array(12)].map((_,m)=>tOut.filter(t=>hp(t).month==m+1)),LM=[],MV=[];
+let row=1,prevAk=null;
+for(let q=0;q<4;q++){const ms=[0,1,2].map(p=>q*3+p),nI=Math.max(1,...ms.map(m=>MI[m].length))+2,nE=Math.max(1,...ms.map(m=>MO[m].length))+2,r0=row,rT=r0+2,rIH=rT+1,rI1=rIH+1,rIN=rI1+nI-1,rIT=rIN+1,rPT=rIT+2,rEH=rPT+1,rE1=rEH+1,rEN=rE1+nE-1,rET=rEN+1,rSA=rET+1,rS1=rSA+1;
+box(K,r0,0,r0+1,3*SS-2,'TRIWULAN '+(q+1),sKQ);K.rh[rT]=21;K.rh[rPT]=21;K.rh[rIH]=18;K.rh[rEH]=18;K.rh[rS1]=20;K.rh[rS1+1]=20;
+ms.forEach((m,p)=>{const o=p*SS,a={o,rI1,rIN,rIT,rE1,rEN,rET,rSA,rS1},ins=MI[m],outs=MO[m],c4=cl(o+4),U=HN[m].toUpperCase();LM[m]=a;
+box(K,rT,o,rT,o+7,'PEMASUKAN '+U,sKMt);
+['NO','TGL','Bulan','STN'].forEach((h,i)=>put(K,rIH,o+i,h,sKH));box(K,rIH,o+4,rIH,o+5,'NOMINAL',sKH);
+for(let i=0;i<nI;i++){const r=rI1+i,t=ins[i];put(K,r,o,t?i+1:null,sKN);put(K,r,o+1,t?hp(t).day:null,sKN);put(K,r,o+2,t?U:null,sKL);put(K,r,o+3,t?(+t.q||1):null,sKN);box(K,r,o+4,r,o+5,t?(+t.a||0):null,sKR)}
+const sIn=sum(ins);box(K,rIT,o,rIT,o+3,'TOTAL',sKT);box(K,rIT,o+4,rIT,o+5,sIn,sKTR,`SUM(${c4}${rI1}:${c4}${rIN})`);
+box(K,rPT,o,rPT,o+BW-1,'PENGELUARAN',sKMt);
+put(K,rEH,o,'NO',sKH);put(K,rEH,o+1,'TGL',sKH);GR.forEach((g,gi)=>{put(K,rEH,o+2+3*gi,g[1],sKH);put(K,rEH,o+3+3*gi,'STN',sKH);put(K,rEH,o+4+3*gi,'HARGA',sKH)});
+for(let i=0;i<nE;i++){const r=rE1+i,t=outs[i],gx=t?GR.findIndex(g=>g[0]==cat(t)):-1;put(K,r,o,t?i+1:null,sKN);put(K,r,o+1,t?hp(t).day:null,sKN);
+GR.forEach((g,gi)=>{const on=gi==gx;put(K,r,o+2+3*gi,on?String(t.n||t.t||''):null,sKL);put(K,r,o+3+3*gi,on?(+t.q||1):null,sKN);put(K,r,o+4+3*gi,on?(+t.a||0):null,sKR)})}
+const gs=GR.map(g=>sum(outs.filter(t=>cat(t)==g[0]))),sOut=gs.reduce((s,v)=>s+v,0);
+box(K,rET,o,rET,o+3,'TOTAL',sKT);put(K,rET,o+4,gs[0],sKTR,`SUM(${c4}${rE1}:${c4}${rEN})`);
+GR.forEach((g,gi)=>{if(!gi)return;const hc=cl(o+4+3*gi);box(K,rET,o+2+3*gi,rET,o+3+3*gi,'TOTAL',sKT);put(K,rET,o+4+3*gi,gs[gi],sKTR,`SUM(${hc}${rE1}:${hc}${rEN})`)});
+const aw=prevAk==null?sA:prevAk,ak=aw+sIn-sOut;prevAk=ak;
+box(K,rSA,o,rSA,o+3,'SALDO AWAL',sKA);box(K,rSA,o+4,rSA,o+5,aw,sKAR,m?`${cl(LM[m-1].o+12)}${LM[m-1].rS1}`:'DASHBOARD!$G$4');
+box(K,rS1,o,rS1+1,o+4,'TOTAL PEMASUKAN',sKG);box(K,rS1,o+5,rS1+1,o+5,sIn,sKGR,`${c4}${rIT}`);
+box(K,rS1,o+6,rS1+1,o+8,'TOTAL PENGELUARAN',sKO);box(K,rS1,o+9,rS1+1,o+10,sOut,sKOR,`SUM(${GR.map((g,gi)=>cl(o+4+3*gi)+rET).join(',')})`);
+box(K,rS1,o+11,rS1+1,o+11,'SALDO AKHIR',sKB);box(K,rS1,o+12,rS1+1,o+BW-1,ak,sKBR,`${c4}${rSA}+${cl(o+5)}${rS1}-${cl(o+9)}${rS1}`);
+MV[m]={sIn,sOut,gs,aw,ak}});
+row=rS1+3}
+const inRg=m=>{const a=LM[m],c=cl(a.o+4);return`KAS!${c}${a.rI1}:${c}${a.rIN}`},exRg=(m,g)=>{const a=LM[m],c=cl(a.o+4+3*g);return`KAS!${c}${a.rE1}:${c}${a.rEN}`},exTot=(m,g)=>{const a=LM[m],c=cl(a.o+4+3*g);return`KAS!${c}${a.rET}`},allEx=m=>GR.map((_,g)=>exRg(m,g)).join(','),
+all12=f=>[...Array(12).keys()].map(f).join(',');
+// ===== sheet SERAGAM (data sumber rumus) =====
+const sHd=st({b:1,c:'FFFFFFFF',f:'FF0B4F7C',bd:'thin',h:'center',w:1}),sD=st({bd:'thin',n:166,h:'center'}),sC=st({bd:'thin',h:'center'}),sTx=st({bd:'thin'}),sRp=st({bd:'thin',n:164}),sNo=st({bd:'thin',n:3,h:'center'});
 const G=mk([13,28,12,26,10,14]);
 ['Tanggal','Nama','Kelas','Jenis','Ukuran','Kode'].forEach((h,i)=>put(G,1,i,h,sHd));
-ST.forEach((t,i)=>{const r=i+2;[String(t.t||'').slice(0,10),t.n||'',t.c||'',t.b||'',t.u||'',t.code||''].forEach((v,c)=>put(G,r,c,String(v),sTx))});
+ST.forEach((t,i)=>{const r=i+2,ds=String(t.t||'').slice(0,10);put(G,r,0,/^\d{4}-\d{2}-\d{2}$/.test(ds)?sd(ds):ds,/^\d{4}-\d{2}-\d{2}$/.test(ds)?sD:sTx);[t.n||'',t.c||'',t.b||'',t.u||'',t.code||''].forEach((v,c)=>put(G,r,c+1,String(v),sTx))});
+
 // ===== DASHBOARD =====
-const D=mk([5,18,15,15,15,15,15,15,3,13,13,13,13,13,13,13,13]);D.rh[1]=42;D.rh[3]=22;D.rh[4]=34;
+const D=mk([5,18,15,15,15,15,15,15,3,13,13,13,13,13,13,13,13]);Object.assign(D.rh,{1:42,3:22,4:34,6:18,7:30,22:18,23:30,31:18,32:30});
 box(D,1,0,1,16,'DASHBOARD LPJ KAS & SERAGAM MADRASAH  -  TAHUN '+y+' H',st({b:1,sz:20,c:'FFFFFFFF',f:'FF0B3F63',h:'left'}));
-const KR="KAS!$G$2:$G$5000",KD="KAS!$D$2:$D$5000",KB="KAS!$B$2:$B$5000",KE="KAS!$E$2:$E$5000",mI=sum(tIn),mO=sum(tOut),nSer=ST.length;
-const CARD=[['Total Transaksi','FF1E88E5','FFFFFFFF',3,[0,1],T.length,'COUNT('+KR+')'],['Pemasukan','FF0F5132','FFFFFFFF',164,[2,3],mI,`SUMIFS(${KR},${KD},"Masuk")`],['Pengeluaran','FFC00000','FFFFFFFF',164,[4,5],mO,`SUMIFS(${KR},${KD},"Keluar")`],['Saldo Awal','FF8B0000','FFFFFFFF',164,[6,7],sA,null],['Saldo Akhir','FF22B14C','FFFFFFFF',164,[9,10],sA+mI-mO,'G4+C4-E4'],['Rata-rata Keluar / Bulan','FFF5B921','FF3B2A00',164,[11,12],Math.round(mO/12),'ROUND(E4/12,0)'],['Seragam Diambil','FF5B3FC4','FFFFFFFF',3,[13,14],nSer,'COUNTA(SERAGAM!$A$2:$A$5000)'],['Periode','FFD83A56','FFFFFFFF',0,[15,16],y+' H',null]];
+box(D,5,0,5,7,'Semua angka dihitung otomatis dari sheet KAS dan SERAGAM. Hanya Saldo Awal (kotak merah tua) yang berupa isian - ubah jika perlu.',st({i:1,sz:9,c:'FF666666'}));
+const mI=sum(tIn),mO=sum(tOut),nSer=ST.length,actM=[...Array(12).keys()].filter(i=>MI[i].length+MO[i].length>0).length;
+const CARD=[['Total Transaksi','FF1E88E5','FFFFFFFF',3,[0,1],T.length,'C20'],['Pemasukan','FF0F5132','FFFFFFFF',164,[2,3],mI,'D20'],['Pengeluaran','FFC00000','FFFFFFFF',164,[4,5],mO,'E20'],['Saldo Awal','FF8B0000','FFFFFFFF',164,[6,7],sA,null],['Saldo Akhir','FF22B14C','FFFFFFFF',164,[9,10],sA+mI-mO,'G4+C4-E4'],['Rata-rata Keluar / Bulan','FFF5B921','FF3B2A00',164,[11,12],actM?Math.round(mO/actM):0,'IFERROR(ROUND(E4/COUNTIF(C8:C19,">0"),0),0)'],['Seragam Diambil','FF5B3FC4','FFFFFFFF',3,[13,14],nSer,'COUNTA(SERAGAM!$A$2:$A$5000)'],['Periode','FFD83A56','FFFFFFFF',0,[15,16],y+' H',null]];
 CARD.forEach(([lb,f,c,n,[a,b],v,fm])=>{box(D,3,a,3,b,lb,st({b:1,c,f,bd:'wh',h:'center'}));box(D,4,a,4,b,v,st({b:1,sz:16,c,f,bd:'wh',h:'center',n}),fm)});
 const ttl=(r,txt,f)=>box(D,r,0,r,7,txt,st({b:1,sz:13,c:'FFFFFFFF',f,h:'left'})),hd=(r,arr,f)=>arr.forEach((h,i)=>put(D,r,i,h,st({b:1,bd:'thin',h:'center',f,w:1}))),
 tc=(f,n,b)=>st({bd:'thin',n,b:b?1:0,f,h:n==0?'':n==3?'center':''});
-// Tabel 1: rekap kas per bulan
+// Tabel 1: rekap kas per bulan (ditarik dari total di sheet KAS)
 ttl(6,'Rekap Kas per Bulan Hijriyah','FF0B4F7C');hd(7,['No','Bulan Hijriyah','Jml Transaksi','Pemasukan','Pengeluaran','Saldo Awal','Saldo Akhir','Keterangan'],'FFBFE3F2');
-let prev=sA,tc1=0;const mo=[];
-for(let i=0;i<12;i++){const r=8+i,a=T.filter(t=>hp(t).month==i+1),ii=sum(a.filter(t=>t.y=='in')),oo=sum(a.filter(t=>t.y=='out')),aw=prev,ak=aw+ii-oo;prev=ak;tc1+=a.length;mo.push({ak});
-put(D,r,0,i+1,sNo);put(D,r,1,HN[i],sTx);put(D,r,2,a.length,sNo,`COUNTIFS(${KB},$B${r})`);put(D,r,3,ii,sRp,`SUMIFS(${KR},${KB},$B${r},${KD},"Masuk")`);put(D,r,4,oo,sRp,`SUMIFS(${KR},${KB},$B${r},${KD},"Keluar")`);put(D,r,5,aw,sRp,i?`G${r-1}`:'$G$4');put(D,r,6,ak,sRp,`F${r}+D${r}-E${r}`);put(D,r,7,a.length?(oo>ii?'Defisit':'Surplus'):'-',sC,`IF(C${r}=0,"-",IF(E${r}>D${r},"Defisit","Surplus"))`)}
+let prev=sA,tc1=0;
+for(let i=0;i<12;i++){const r=8+i,a=LM[i],ii=MV[i].sIn,oo=MV[i].sOut,n=MI[i].length+MO[i].length,aw=prev,ak=aw+ii-oo;prev=ak;tc1+=n;
+put(D,r,0,i+1,sNo);put(D,r,1,HN[i],sTx);put(D,r,2,n,sNo,`COUNT(${inRg(i)})+COUNT(${allEx(i)})`);put(D,r,3,ii,sRp,`KAS!${cl(a.o+4)}${a.rIT}`);put(D,r,4,oo,sRp,`KAS!${cl(a.o+9)}${a.rS1}`);put(D,r,5,aw,sRp,i?`G${r-1}`:'$G$4');put(D,r,6,ak,sRp,`F${r}+D${r}-E${r}`);put(D,r,7,n?(oo>ii?'Defisit':'Surplus'):'-',sC,`IF(C${r}=0,"-",IF(E${r}>D${r},"Defisit","Surplus"))`)}
 {const f='FFBFE3F2',n=tc(f,3,1),m=tc(f,164,1),t=tc(f,0,1);box(D,20,0,20,1,'Total',t);put(D,20,2,tc1,n,'SUM(C8:C19)');put(D,20,3,mI,m,'SUM(D8:D19)');put(D,20,4,mO,m,'SUM(E8:E19)');put(D,20,5,sA,m,'F8');put(D,20,6,prev,m,'G19');put(D,20,7,mO>mI?'Defisit':'Surplus',st({bd:'thin',b:1,f,h:'center'}),'IF(E20>D20,"Defisit","Surplus")')}
-// Tabel 2: pengeluaran per kategori
+// Tabel 2: pengeluaran per kategori (ditarik dari kolom kategori di sheet KAS)
 ttl(22,'Rekap Pengeluaran per Kategori','FFB01E1E');hd(23,['No','Kategori','Jml Transaksi','Total Pengeluaran','Persentase','Rata-rata / Transaksi','Terbesar','Peringkat'],'FFF8C9CF');
-const cats=[...CK.map(k=>CATX[CAT[k]]),'Lainnya'],cv=cats.map(n=>{const a=tOut.filter(t=>cat(t)==n);return{n,c:a.length,s:sum(a),mx:Math.max(0,...a.map(t=>+t.a||0))}}),tot2=sum(tOut);
-cv.forEach((x,i)=>{const r=24+i,rk=1+cv.filter(z=>z.s>x.s).length;put(D,r,0,i+1,sNo);put(D,r,1,x.n,sTx);put(D,r,2,x.c,sNo,`COUNTIFS(${KE},$B${r},${KD},"Keluar")`);put(D,r,3,x.s,sRp,`SUMIFS(${KR},${KE},$B${r},${KD},"Keluar")`);put(D,r,4,tot2?x.s/tot2:0,st({bd:'thin',n:165,h:'center'}),`IF($D$29=0,0,D${r}/$D$29)`);put(D,r,5,x.c?x.s/x.c:0,sRp,`IF(C${r}=0,0,D${r}/C${r})`);put(D,r,6,x.mx,sRp,`MAXIFS(${KR},${KE},$B${r},${KD},"Keluar")`);put(D,r,7,rk,sNo,`RANK(D${r},$D$24:$D$28)`)});
+const cats=[...CK.map(k=>CATX[CAT[k]]),'Lainnya'],cv=cats.map((n,g)=>{const a=tOut.filter(t=>cat(t)==n);return{n,c:a.length,s:sum(a),mx:Math.max(0,...a.map(t=>+t.a||0))}}),tot2=sum(tOut);
+cv.forEach((x,i)=>{const r=24+i,rk=1+cv.filter(z=>z.s>x.s).length,real=i<NG;put(D,r,0,i+1,sNo);put(D,r,1,x.n,sTx);
+put(D,r,2,x.c,sNo,real?`COUNT(${all12(m=>exRg(m,i))})`:null);put(D,r,3,x.s,sRp,real?`SUM(${all12(m=>exTot(m,i))})`:null);
+put(D,r,4,tot2?x.s/tot2:0,st({bd:'thin',n:165,h:'center'}),`IF($D$29=0,0,D${r}/$D$29)`);put(D,r,5,x.c?x.s/x.c:0,sRp,`IF(C${r}=0,0,D${r}/C${r})`);put(D,r,6,x.mx,sRp,real?`MAX(${all12(m=>exRg(m,i))})`:null);put(D,r,7,rk,sNo,`RANK(D${r},$D$24:$D$28)`)});
 {const f='FFF8C9CF',n=tc(f,3,1),m=tc(f,164,1);box(D,29,0,29,1,'Total',tc(f,0,1));put(D,29,2,tOut.length,n,'SUM(C24:C28)');put(D,29,3,tot2,m,'SUM(D24:D28)');put(D,29,4,tot2?1:0,st({bd:'thin',n:165,b:1,f,h:'center'}),'SUM(E24:E28)');put(D,29,5,tOut.length?tot2/tOut.length:0,m,'IF(C29=0,0,D29/C29)');put(D,29,6,Math.max(0,...cv.map(x=>x.mx)),m,'MAX(G24:G28)');put(D,29,7,null,m)}
 // Tabel 3: seragam
 const J=[...new Set([...(Array.isArray(SG.jenis)?SG.jenis:[]),...ST.map(t=>t.b)])].filter(Boolean).map(String),nj=J.length,tr=33+nj;
 ttl(31,'Rekap Seragam (seluruh data)','FF6A3FB5');hd(32,['No','Jenis Seragam','Jumlah Diambil','Persentase','Stok Tercatat'],'FFD9C7F2');
-J.forEach((j,i)=>{const r=33+i,c=ST.filter(t=>String(t.b)==j).length,stk=(SG.kat||[]).filter(m=>m.b==j).reduce((s,m)=>s+(+(SG.stok||{})[m.c]||0),0);put(D,r,0,i+1,sNo);put(D,r,1,j,sTx);put(D,r,2,c,sNo,`COUNTIF(SERAGAM!$D$2:$D$5000,$B${r})`);put(D,r,3,nSer?c/nSer:0,st({bd:'thin',n:165,h:'center'}),`IF($C$${tr}=0,0,C${r}/$C$${tr})`);put(D,r,4,stk,sNo)});
-{const f='FFD9C7F2';box(D,tr,0,tr,1,'Total',tc(f,0,1));put(D,tr,2,J.reduce((s,j)=>s+ST.filter(t=>String(t.b)==j).length,0),tc(f,3,1),`SUM(C33:C${tr-1})`);put(D,tr,3,nSer?1:0,st({bd:'thin',n:165,b:1,f,h:'center'}),`SUM(D33:D${tr-1})`);put(D,tr,4,null,tc(f,3,1))}
+const stkOf=j=>(SG.kat||[]).filter(m=>m.b==j).reduce((s,m)=>s+(+(SG.stok||{})[m.c]||0),0);
+const tn=J.reduce((s,j)=>s+ST.filter(t=>String(t.b)==j).length,0);
+J.forEach((j,i)=>{const r=33+i,c=ST.filter(t=>String(t.b)==j).length;put(D,r,0,i+1,sNo);put(D,r,1,j,sTx);put(D,r,2,c,sNo,`COUNTIF(SERAGAM!$D$2:$D$5000,$B${r})`);put(D,r,3,tn?c/tn:0,st({bd:'thin',n:165,h:'center'}),`IF($C$${tr}=0,0,C${r}/$C$${tr})`);put(D,r,4,stkOf(j),sNo)});
+{const f='FFD9C7F2';box(D,tr,0,tr,1,'Total',tc(f,0,1));put(D,tr,2,tn,tc(f,3,1),nj?`SUM(C33:C${tr-1})`:null);put(D,tr,3,tn?1:0,st({bd:'thin',n:165,b:1,f,h:'center'}),nj?`SUM(D33:D${tr-1})`:null);put(D,tr,4,J.reduce((s,j)=>s+stkOf(j),0),tc(f,3,1),nj?`SUM(E33:E${tr-1})`:null)}
+
 // ===== grafik =====
 const ref=(c,a,b)=>`DASHBOARD!$${c}$${a}:$${c}$${b}`,gv=f=>{const m=f.match(/\$([A-Z]+)\$(\d+):\$([A-Z]+)\$(\d+)/),c1=m[1].charCodeAt(0)-65,c2=m[3].charCodeAt(0)-65,o=[];for(let r=+m[2];r<=+m[4];r++)for(let c=c1;c<=c2;c++){const z=D.c.find(q=>q.r==r&&q.c==c);o.push(z?z.v:null)}return o},
 catX=f=>{const a=gv(f);return`<c:cat><c:strRef><c:f>${f}</c:f><c:strCache><c:ptCount val="${a.length}"/>${a.map((v,i)=>`<c:pt idx="${i}"><c:v>${xe(v==null?'':v)}</c:v></c:pt>`).join('')}</c:strCache></c:strRef></c:cat>`},valX=f=>{const a=gv(f);return`<c:val><c:numRef><c:f>${f}</c:f><c:numCache><c:formatCode>General</c:formatCode><c:ptCount val="${a.length}"/>${a.map((v,i)=>`<c:pt idx="${i}"><c:v>${+v||0}</c:v></c:pt>`).join('')}</c:numCache></c:numRef></c:val>`},fillX=h=>`<c:spPr><a:solidFill><a:srgbClr val="${h}"/></a:solidFill></c:spPr>`,
@@ -477,6 +513,7 @@ CH.push([pie('Pemasukan vs Pengeluaran',ref('D',7,7).replace('$D$7:$D$7','$D$7:$
 CH.push([colC('Jumlah Transaksi per Bulan',bs(0,'Transaksi','1E88E5',ref('B',8,19),ref('C',8,19),1),''),[9,56,17,74]]);
 CH.push([colC('Grafik Saldo Kas per Bulan',bs(0,'Saldo Awal','1E5FBF',ref('B',8,19),ref('F',8,19))+bs(1,'Pengeluaran','F5B921',ref('B',8,19),ref('E',8,19)),ls(2,'Saldo Akhir','22B14C',ref('B',8,19),ref('G',8,19))),[0,75,17,97]]);
 if(nj)CH.push([colC('Seragam Diambil per Jenis',bs(0,'Diambil','5B3FC4',ref('B',33,32+nj),ref('C',33,32+nj)),''),[9,37,17,54]]);
+
 
 // ===== gambar grafik (tampil di semua aplikasi, termasuk preview HP) =====
 const GW=1500,GH=1580,cvs=document.createElement('canvas');cvs.width=GW;cvs.height=GH;const g=cvs.getContext('2d');
@@ -510,23 +547,27 @@ g.lineWidth=1.5;for(let i=0;i<=5;i++){const v=lo+(mx-lo)*i/5,y=sc(v);g.strokeSty
 const bw=(R-L)/12;cIn.forEach((n,i)=>{const x=L+i*bw;g.fillStyle='#1E5FBF';g.fillRect(x+bw*.12,sc(n),bw*.36,sc(0)-sc(n));g.fillStyle='#F5B921';g.fillRect(x+bw*.5,sc(cOut[i]),bw*.36,sc(0)-sc(cOut[i]));tx(SH3[i],x+bw/2,B+24,22,'#222','center')});
 g.strokeStyle='#22B14C';g.lineWidth=5;g.beginPath();cAk.forEach((v,i)=>{const x=L+i*bw+bw/2;i?g.lineTo(x,sc(v)):g.moveTo(x,sc(v))});g.stroke();cAk.forEach((v,i)=>{g.fillStyle='#fff';g.beginPath();g.arc(L+i*bw+bw/2,sc(v),9,0,7);g.fill();g.stroke()})}
 const PNG=Uint8Array.from(atob(cvs.toDataURL('image/png').split(',')[1]),c=>c.charCodeAt(0)),E=mk([20]);
+
 // ===== rakit file xlsx =====
-CH.forEach((c,i)=>c[1]=[9,50+i*18,17,67+i*18]);const SH=[['DASHBOARD',D],['KAS',K],['SERAGAM',G]],F=[],pad=s=>H+s;
+const EW=768*9525,EH=Math.round(768*GH/GW*9525),pxh=r=>Math.round((D.rh[r]||15)*4/3);let acc=0,er=6;while(acc<EH/9525){acc+=pxh(er);er++}
+const CS=er+1;CH.forEach((c,i)=>{const rr=CS+Math.floor(i/2)*19;c[1]=i%2?[9,rr,17,rr+18]:[0,rr,8,rr+18]});
+const SH=[['DASHBOARD',D],['KAS',K],['SERAGAM',G]],F=[],pad=s=>H+s;
 F.push(['[Content_Types].xml',pad(`<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>${SH.map((_,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}<Default Extension="png" ContentType="image/png"/><Override PartName="/xl/drawings/drawing1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>${CH.map((_,i)=>`<Override PartName="/xl/charts/chart${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.drawingml.chart+xml"/>`).join('')}</Types>`)]);
 F.push(['_rels/.rels',pad(`<Relationships xmlns="${PK}"><Relationship Id="rId1" Type="${RN}/officeDocument" Target="xl/workbook.xml"/></Relationships>`)]);
 F.push(['xl/workbook.xml',pad(`<workbook xmlns="${SM}" xmlns:r="${RN}"><sheets>${SH.map(([n],i)=>`<sheet name="${n}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('')}</sheets><calcPr calcId="191029" fullCalcOnLoad="1"/></workbook>`)]);
 F.push(['xl/_rels/workbook.xml.rels',pad(`<Relationships xmlns="${PK}">${SH.map((_,i)=>`<Relationship Id="rId${i+1}" Type="${RN}/worksheet" Target="worksheets/sheet${i+1}.xml"/>`).join('')}<Relationship Id="rId${SH.length+1}" Type="${RN}/styles" Target="styles.xml"/></Relationships>`)]);
-const bx=k=>k==''?'<border><left/><right/><top/><bottom/><diagonal/></border>':`<border>${['left','right','top','bottom'].map(s=>`<${s} style="${k=='wh'?'thick':'thin'}"><color rgb="${k=='wh'?'FFFFFFFF':'FF9BB0BF'}"/></${s}>`).join('')}<diagonal/></border>`;
-F.push(['xl/styles.xml',pad(`<styleSheet xmlns="${SM}"><numFmts count="3"><numFmt numFmtId="164" formatCode="&quot;Rp&quot; #,##0"/><numFmt numFmtId="165" formatCode="0.0%"/><numFmt numFmtId="166" formatCode="dd/mm/yyyy"/></numFmts><fonts count="${Fo.length}">${Fo.map(({v:[b,z,c]})=>`<font>${b?'<b/>':''}<sz val="${z}"/><color rgb="${c}"/><name val="Calibri"/></font>`).join('')}</fonts><fills count="${Fi.length+2}"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill>${Fi.map(({v})=>`<fill><patternFill patternType="solid"><fgColor rgb="${v}"/><bgColor indexed="64"/></patternFill></fill>`).join('')}</fills><borders count="${Bo.length}">${Bo.map(({v})=>bx(v)).join('')}</borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="${X.length}">${X.map(({z:[f,l,b,n,h,w]})=>`<xf numFmtId="${n}" fontId="${f}" fillId="${l}" borderId="${b}" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center"${h?` horizontal="${h}"`:''}${w?' wrapText="1"':''}/></xf>`).join('')}</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`)]);
+const bx=k=>k==''?'<border><left/><right/><top/><bottom/><diagonal/></border>':`<border>${['left','right','top','bottom'].map(s=>`<${s} style="${k=='wh'?'thick':'thin'}"><color rgb="${k=='wh'?'FFFFFFFF':k=='blk'?'FF000000':'FF9BB0BF'}"/></${s}>`).join('')}<diagonal/></border>`;
+F.push(['xl/styles.xml',pad(`<styleSheet xmlns="${SM}"><numFmts count="4"><numFmt numFmtId="164" formatCode="&quot;Rp&quot; #,##0"/><numFmt numFmtId="165" formatCode="0.0%"/><numFmt numFmtId="166" formatCode="dd/mm/yyyy"/><numFmt numFmtId="167" formatCode="${xe(NFK)}"/></numFmts><fonts count="${Fo.length}">${Fo.map(({v:[b,z,c,it]})=>`<font>${b?'<b/>':''}${it?'<i/>':''}<sz val="${z}"/><color rgb="${c}"/><name val="Calibri"/></font>`).join('')}</fonts><fills count="${Fi.length+2}"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill>${Fi.map(({v})=>`<fill><patternFill patternType="solid"><fgColor rgb="${v}"/><bgColor indexed="64"/></patternFill></fill>`).join('')}</fills><borders count="${Bo.length}">${Bo.map(({v})=>bx(v)).join('')}</borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="${X.length}">${X.map(({z:[f,l,b,n,h,w]})=>`<xf numFmtId="${n}" fontId="${f}" fillId="${l}" borderId="${b}" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center"${h?` horizontal="${h}"`:''}${w?' wrapText="1"':''}/></xf>`).join('')}</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`)]);
 const cx=o=>{const rf=cl(o.c)+o.r,s=o.z?` s="${o.z}"`:'',f=o.f?`<f>${xe(o.f)}</f>`:'',v=o.v;if(v==null)return`<c r="${rf}"${s}/>`;if(typeof v=='number')return`<c r="${rf}"${s}>${f}<v>${v}</v></c>`;if(o.f)return`<c r="${rf}"${s} t="str">${f}<v>${xe(v)}</v></c>`;return`<c r="${rf}"${s} t="inlineStr"><is><t xml:space="preserve">${xe(v)}</t></is></c>`};
-SH.forEach(([n,s],i)=>{const rows={};s.c.forEach(o=>(rows[o.r]=rows[o.r]||[]).push(o));const dash=i==0;
-F.push([`xl/worksheets/sheet${i+1}.xml`,pad(`<worksheet xmlns="${SM}" xmlns:r="${RN}"><sheetPr><pageSetUpPr fitToPage="1"/></sheetPr><sheetViews><sheetView workbookViewId="0"${dash?' showGridLines="0"':''}>${dash?'':'<pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/>'}</sheetView></sheetViews><sheetFormatPr defaultRowHeight="15"/><cols>${s.cols.map((w,j)=>`<col min="${j+1}" max="${j+1}" width="${w}" customWidth="1"/>`).join('')}</cols><sheetData>${Object.keys(rows).map(Number).sort((a,b)=>a-b).map(r=>`<row r="${r}"${s.rh[r]?` ht="${s.rh[r]}" customHeight="1"`:''}>${rows[r].sort((a,b)=>a.c-b.c).map(cx).join('')}</row>`).join('')}</sheetData>${s.mg.length?`<mergeCells count="${s.mg.length}">${s.mg.map(m=>`<mergeCell ref="${m}"/>`).join('')}</mergeCells>`:''}<pageMargins left="0.4" right="0.4" top="0.5" bottom="0.5" header="0.3" footer="0.3"/><pageSetup paperSize="9" orientation="landscape" fitToHeight="0"/>${dash?'<drawing r:id="rId1"/>':''}</worksheet>`)])});
-const EW=768*9525,EH=Math.round(768*GH/GW*9525),OX=D.cols.slice(0,9).reduce((a,w)=>a+Math.round(w*7+5),0)*9525,OY=(42+15+22+34+15)*12700;F.push(['xl/media/grafik.png',PNG]);
+SH.forEach(([n,s],i)=>{const rows={};s.c.forEach(o=>(rows[o.r]=rows[o.r]||[]).push(o));const dash=i==0,frz=i==2;
+F.push([`xl/worksheets/sheet${i+1}.xml`,pad(`<worksheet xmlns="${SM}" xmlns:r="${RN}"><sheetPr><pageSetUpPr fitToPage="1"/></sheetPr><sheetViews><sheetView workbookViewId="0"${dash?' showGridLines="0"':''}>${frz?'<pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/>':''}</sheetView></sheetViews><sheetFormatPr defaultRowHeight="15"/><cols>${s.cols.map((w,j)=>`<col min="${j+1}" max="${j+1}" width="${w}" customWidth="1"/>`).join('')}</cols><sheetData>${Object.keys(rows).map(Number).sort((a,b)=>a-b).map(r=>`<row r="${r}"${s.rh[r]?` ht="${s.rh[r]}" customHeight="1"`:''}>${rows[r].sort((a,b)=>a.c-b.c).map(cx).join('')}</row>`).join('')}</sheetData>${s.mg.length?`<mergeCells count="${s.mg.length}">${s.mg.map(m=>`<mergeCell ref="${m}"/>`).join('')}</mergeCells>`:''}<pageMargins left="0.4" right="0.4" top="0.5" bottom="0.5" header="0.3" footer="0.3"/><pageSetup paperSize="9" orientation="landscape" fitToHeight="0"/>${dash?'<drawing r:id="rId1"/>':''}</worksheet>`)])});
+F.push(['xl/media/grafik.png',PNG]);
 F.push(['xl/worksheets/_rels/sheet1.xml.rels',pad(`<Relationships xmlns="${PK}"><Relationship Id="rId1" Type="${RN}/drawing" Target="../drawings/drawing1.xml"/></Relationships>`)]);
-F.push(['xl/drawings/drawing1.xml',pad(`<xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="${AN}" xmlns:r="${RN}" xmlns:c="${CN}">${CH.map(([,[a,b,c,d]],i)=>`<xdr:twoCellAnchor><xdr:from><xdr:col>${a}</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>${b}</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:from><xdr:to><xdr:col>${c}</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>${d}</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:to><xdr:graphicFrame macro=""><xdr:nvGraphicFramePr><xdr:cNvPr id="${i+2}" name="Grafik ${i+1}"/><xdr:cNvGraphicFramePr/></xdr:nvGraphicFramePr><xdr:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/></xdr:xfrm><a:graphic><a:graphicData uri="${CN}"><c:chart r:id="rId${i+1}"/></a:graphicData></a:graphic></xdr:graphicFrame><xdr:clientData/></xdr:twoCellAnchor>`).join('')}<xdr:twoCellAnchor editAs="oneCell"><xdr:from><xdr:col>9</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>5</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:from><xdr:to><xdr:col>17</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>46</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:to><xdr:pic><xdr:nvPicPr><xdr:cNvPr id="50" name="Grafik Dashboard"/><xdr:cNvPicPr/></xdr:nvPicPr><xdr:blipFill><a:blip r:embed="rId${CH.length+1}"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill><xdr:spPr><a:xfrm><a:off x="${OX}" y="${OY}"/><a:ext cx="${EW}" cy="${EH}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:twoCellAnchor></xdr:wsDr>`)]);
+F.push(['xl/drawings/drawing1.xml',pad(`<xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="${AN}" xmlns:r="${RN}" xmlns:c="${CN}">${CH.map(([,[a,b,c,d]],i)=>`<xdr:twoCellAnchor><xdr:from><xdr:col>${a}</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>${b}</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:from><xdr:to><xdr:col>${c}</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>${d}</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:to><xdr:graphicFrame macro=""><xdr:nvGraphicFramePr><xdr:cNvPr id="${i+2}" name="Grafik ${i+1}"/><xdr:cNvGraphicFramePr/></xdr:nvGraphicFramePr><xdr:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/></xdr:xfrm><a:graphic><a:graphicData uri="${CN}"><c:chart r:id="rId${i+1}"/></a:graphicData></a:graphic></xdr:graphicFrame><xdr:clientData/></xdr:twoCellAnchor>`).join('')}<xdr:oneCellAnchor><xdr:from><xdr:col>9</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>5</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:from><xdr:ext cx="${EW}" cy="${EH}"/><xdr:pic><xdr:nvPicPr><xdr:cNvPr id="50" name="Grafik Dashboard"/><xdr:cNvPicPr/></xdr:nvPicPr><xdr:blipFill><a:blip r:embed="rId${CH.length+1}"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill><xdr:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${EW}" cy="${EH}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:oneCellAnchor></xdr:wsDr>`)]);
 F.push(['xl/drawings/_rels/drawing1.xml.rels',pad(`<Relationships xmlns="${PK}">${CH.map((_,i)=>`<Relationship Id="rId${i+1}" Type="${RN}/chart" Target="../charts/chart${i+1}.xml"/>`).join('')}<Relationship Id="rId${CH.length+1}" Type="${RN}/image" Target="../media/grafik.png"/></Relationships>`)]);
 CH.forEach(([x],i)=>F.push([`xl/charts/chart${i+1}.xml`,x]));
 dlf('Dashboard_LPJ_'+y+'H.xlsx',zip(F),'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');gtoast('Excel dibuat','Dashboard LPJ '+y+' H')}
+
 function lpjX(y,q){const ms=q?[0,1,2].map(i=>(q-1)*3+i):[...Array(12).keys()];xlsx('LPJ_'+(q?'Triwulan'+q+'_':'')+y+'H.xlsx',[...ms.map(m=>lpjMonth(y,m)),lpjRekap(y,ms,q?'Triwulan '+q+' Tahun '+y+' H':'Tahun '+y+' H (Muharram - Dzulhijjah)')]);gtoast('Excel dibuat','LPJ '+(q?'triwulan '+q:'1 tahun')+' '+y+' H')}
 function riwSheet(r){const R=[['Tanggal','Hijriyah','Jenis','Nama','Jumlah','Kategori','Toko','No. bukti','Nominal'].map(x=>C(x,1))];r.forEach(t=>R.push([C(fd2(t.d),5),C(hsd(t.d,t.ho),5),C(t.y=='in'?'Masuk':'Belanja',5),C(t.n||'',5),C(+t.q||1,5),C(t.y=='out'?CAT[t.c]||'':'',5),C(t.t||'',5),C(t.b||'',5),C((t.y=='in'?1:-1)*(+t.a||0),2)]));return{name:'Riwayat',rows:R,cols:[12,22,10,28,8,16,16,14,14]}}
 
